@@ -56,6 +56,18 @@ for ax, H, title in zip(axes, Hs, titles):
         np.vstack((start_t[1, :], end_t[1, :])),
         'b-'
     )
+
+    # --- Measure side lengths ---
+    lengths = np.sqrt((end_t[0, :] - start_t[0, :])**2 +
+                      (end_t[1, :] - start_t[1, :])**2)
+
+    # --- Display lengths on each segment ---
+    mid_x = (start_t[0, :] + end_t[0, :]) / 2
+    mid_y = (start_t[1, :] + end_t[1, :]) / 2
+
+    for x, y, L in zip(mid_x, mid_y, lengths):
+        ax.text(x, y, f"{L:.2f}", color='red', fontsize=8)
+
     ax.set_title(title)
     ax.set_aspect('equal')
     ax.set_xlabel('x')
