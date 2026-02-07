@@ -57,11 +57,11 @@ for ax, H, title in zip(axes, Hs, titles):
         'b-'
     )
 
-    # --- Measure side lengths ---
+    # Measure side lengths
     lengths = np.sqrt((end_t[0, :] - start_t[0, :])**2 +
                       (end_t[1, :] - start_t[1, :])**2)
 
-    # --- Display lengths on each segment ---
+    # Display lengths on each segment
     mid_x = (start_t[0, :] + end_t[0, :]) / 2
     mid_y = (start_t[1, :] + end_t[1, :]) / 2
 
