@@ -32,9 +32,9 @@ if __name__ == "__main__":
     
     N1,N2 = np.eye(3), np.eye(3)
     
-    norm = True
+    normalize = True
 
-    if norm:
+    if normalize:
         # Normalize
         N1 = normalize_points(x1_h)
         N2 = normalize_points(x2_h)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     distances = np.abs(np.sum(l * x2_h, axis=0))
     plt.hist(distances, bins=100)
 
-    if norm:
+    if normalize:
         plt.title("Epipolar distance histogram (normalized case)")
     else:
         plt.title("Epipolar distance histogram (unnormalized case)")
