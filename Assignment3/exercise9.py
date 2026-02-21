@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     # Enforce 2 equal singular values with third one being zero
     U_e, S_e, Vt_e = np.linalg.svd(E)
-    sv = (S_e[0] + S_e[1]) / 2 # Take the mean of first and second singular values
+    sv = np.mean(S_e[:2]) # Take the mean of first and second singular values
     S_e = [sv, sv, 0]
     E = U_e @ np.diag(S_e) @ Vt_e
 
