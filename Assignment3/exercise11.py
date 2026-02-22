@@ -92,7 +92,7 @@ if __name__ == "__main__":
                   [1, 0, 0],
                   [0, 0, 1]])
 
-    # Construct the camera matricies
+    # Construct the camera matricies from E
     P2a = np.hstack((u @ w @ vt, u[:, 2:3]))
     P2b = np.hstack((u @ w @ vt, -u[:, 2:3]))
     P2c = np.hstack((u @ w.T @ vt, u[:, 2:3]))

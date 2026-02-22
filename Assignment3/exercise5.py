@@ -66,7 +66,11 @@ if __name__ == "__main__":
     # Epipolar constraints, should be roughly zero
     epi = np.sum(x2n * (Fn @ x1n), axis=0)
 
-    print("Mean epipolar constraint (normalized):", np.mean(np.abs(epi)))
+    if normalize:
+        print("Mean epipolar constraint (normalized):", np.mean(np.abs(epi)))
+    else:
+        print("Mean epipolar constraint (unnormalized):", np.mean(np.abs(epi)))
+
     print("Determinant is:", np.linalg.det(Fn))
 
     # Unnormalized fundamental matrix

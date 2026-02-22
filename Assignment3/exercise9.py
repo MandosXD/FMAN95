@@ -1,7 +1,6 @@
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.linalg import null_space
 
 def pflat(X):
     X = np.asarray(X)
@@ -52,12 +51,14 @@ if __name__ == "__main__":
     # Convert to homogeneous
     x1_h = to_homogeneous(x1)
     x2_h = to_homogeneous(x2)
+
+    print("Calibration matrix is \n", K)
     
     # Normalize points
     K_inv = np.linalg.inv(K)
-
     x1n = K_inv @ x1_h
     x2n = K_inv @ x2_h
+
     # Build M matrix for epipolar constraints
     M = np.zeros((x1n.shape[1], 9))
     for i in range(x1n.shape[1]):
@@ -76,15 +77,14 @@ if __name__ == "__main__":
 
     # Enforce 2 equal singular values with third one being zero
     U_e, S_e, Vt_e = np.linalg.svd(E)
-    sv = np.mean(S_e[:2]) # Take the mean of first and second singular values
-    S_e = [sv, sv, 0]
-    E = U_e @ np.diag(S_e) @ Vt_e
+    if np.linalg.det(U_e @ Vt_e) < 0: #Ensure proper rotation
+        Vt_e = -Vt_e
+    E = U_e @ np.diag([1,1,0]) @ Vt_e # Arbitrary scale
 
     # Epipolar constraints, should be roughly zero
     epi = np.sum(x2n * (E @ x1n), axis=0)
 
-    print("Mean epipolar constraint (normalized):", np.mean(np.abs(epi)))
-    print("Singular values of E are:", S_e)
+    print("Mean epipolar constraint (Essential matrix):", np.mean(np.abs(epi)))
 
     # Computing the unnormalized fundamental matrix F
     F = K_inv.T @ E @ K_inv
