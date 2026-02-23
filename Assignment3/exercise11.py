@@ -34,6 +34,31 @@ def triangulate_point(P1, P2, x1, x2):
     X = Vt[-1]
     return X
 
+def depth(P, X):
+    """
+    Compute depth of 3D points X w.r.t. camera P.
+
+    """
+    # Left 3x3 block
+    A = P[:, :3]
+
+    # sign(det(A))
+    sign_det = np.sign(np.linalg.det(A))
+
+    # Norm of third row of A
+    A3_norm = np.linalg.norm(A[2, :])
+
+    # Project points
+    PX = P @ X
+
+    # lambda = third row of PX
+    lam = PX[2, :]
+
+    # rho = fourth coordinate of X
+    rho = X[3, :]
+
+    return sign_det * lam / (A3_norm * rho)
+
 if __name__ == "__main__":
     # Loading the .npz file
     data = np.load('data/A3_ex5_data.npz')
@@ -117,15 +142,10 @@ if __name__ == "__main__":
 
         for i in range(x1n.shape[1]):
             X[:, i] = triangulate_point(P1, P2, x1n[:, i], x2n[:, i])
-        X = pflat(X)
         
         # Check that the points are infront of both cameras
-        # Camera 1: Z > 0
-        Z1 = X[2, :]
-
-        # Camera 2: Z > 0 after projection
-        X_cam2 = P2 @ X
-        Z2 = X_cam2[2, :]
+        Z1 = depth(P1, X)
+        Z2 = depth(P2, X)
 
         count = np.sum((Z1 > 0) & (Z2 > 0))
 
@@ -134,7 +154,7 @@ if __name__ == "__main__":
         if count > best_count:
             best_count = count
             best_P2 = P2
-            best_X = X
+            best_X = pflat(X)
             best_name = name
 
     print(f"Selected camera is {best_name} with {best_count} points in front")
