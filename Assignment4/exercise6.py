@@ -15,7 +15,7 @@ def steepest_descent(P, x, X, num_iters=10):
         gradient = J.T @ r
         
         # Current RMS error
-        current_rms = compute_reprojection_rms_error(P, x, X)
+        current_rms = utils.compute_reprojection_rms_error(P, x, X)
         rms_history.append(current_rms)
         
         # Descent direction
@@ -33,7 +33,7 @@ def steepest_descent(P, x, X, num_iters=10):
             P_new, X_new = utils.update_solution(P, X, delta_scaled)
             
             # Compute new RMS
-            new_rms = compute_reprojection_rms_error(P_new, x, X_new)
+            new_rms = utils.compute_reprojection_rms_error(P_new, x, X_new)
             
             if new_rms < current_rms:
                 P, X = P_new, X_new
