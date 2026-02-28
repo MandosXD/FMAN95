@@ -5,47 +5,71 @@ import matplotlib.pyplot as plt
 def steepest_descent(P, x, X, num_iters=10):
     
     rms_history = []
-    
+
     for k in range(num_iters):
         
-        # Linearize
+        # Linearize reprojection error
         r, J = utils.linearize_reprojection_error(P, x, X)
-        
-        # Compute gradient: 2*J^T r  (factor 2 not necessary for direction)
-        gradient = J.T @ r
-        
+
+        # Compute descent direction
+        delta = -J.T @ r
+
         # Current RMS error
         current_rms = utils.compute_reprojection_rms_error(P, x, X)
-        rms_history.append(current_rms)
-        
-        # Descent direction
-        delta = -gradient
-        
+
         # Backtracking line search
-        gamma = 1e-3        # initial step size (may need smaller!)
+        gamma = 1e-6   # small initial step (important!)
         success = False
-        
+
         while gamma > 1e-12:
             
             delta_scaled = gamma * delta
-            
+
             # Update solution
             P_new, X_new = utils.update_solution(P, X, delta_scaled)
-            
+
             # Compute new RMS
             new_rms = utils.compute_reprojection_rms_error(P_new, x, X_new)
-            
+
             if new_rms < current_rms:
                 P, X = P_new, X_new
                 success = True
                 break
             else:
                 gamma *= 0.5
-        
+
         if not success:
-            print("Line search failed at iteration", k)
+            print(f"Line search failed at iteration {k}")
             break
-        
+
+        rms_history.append(new_rms)
+
         print(f"Iteration {k+1}: RMS = {new_rms:.6f}, gamma = {gamma:.2e}")
-    
+
     return P, X, rms_history
+
+
+if __name__ == "__main__":
+    # Load data from Exercise 5
+    data = np.load("ex5_results.npz")
+
+    P1 = data["P1"]
+    P2 = data["P2"]
+    X  = data["X"]
+    x1 = data["x1"]
+    x2 = data["x2"]
+
+    # Run steepest descent
+    P_opt, X_opt, rms_history = steepest_descent([P1, P2], [x1, x2], X, num_iters=10)
+
+    # Plot RMS vs iterations
+    plt.figure()
+    plt.plot(range(1, len(rms_history) + 1), rms_history, marker='o')
+    plt.xlabel("Iteration")
+    plt.ylabel("RMS reprojection error")
+    plt.title("Steepest Descent Optimization")
+    plt.grid()
+    plt.show()
+
+    # Final RMS
+    print("\nFinal RMS error:", rms_history[-1])

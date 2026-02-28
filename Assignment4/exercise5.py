@@ -1,6 +1,7 @@
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 def to_homogeneous(X):
     return np.vstack((X, np.ones((1, X.shape[1]))))
@@ -280,3 +281,18 @@ if __name__ == "__main__":
         plt.legend()
         plt.show()
 
+
+    # Save unnormalized cameras and 3D inlier points
+    save_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ex5_results.npz")
+
+    # Save data
+    np.savez(
+        save_path,
+        P1=P1_pixel,
+        P2=P2_pixel,
+        X=best_X,
+        x1=x1_inlier,
+        x2=x2_inlier
+    )
+
+    print(f"Saved reconstruction results to: {save_path}")
