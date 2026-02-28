@@ -10,47 +10,23 @@ def pflat(X):
     X = np.asarray(X)
     return X / X[-1] # Divide by the last row
 
+# From A3_ex11
 def depth(P, X):
-    """
-    Compute depth of 3D points X w.r.t. camera P.
-
-    """
-    # Left 3x3 block
-    A = P[:, :3]
-
-    # sign(det(A))
-    sign_det = np.sign(np.linalg.det(A))
-
-    # Norm of third row of A
-    A3_norm = np.linalg.norm(A[2, :])
-
-    # Project points
-    PX = P @ X
-
-    # lambda = third row of PX
-    lam = PX[2, :]
-
-    # rho = fourth coordinate of X
-    rho = X[3, :]
-
-    return sign_det * lam / (A3_norm * rho)
+    return (np.sign(np.linalg.det(P[:, :3])) *
+            (P @ X)[2] /
+            (np.linalg.norm(P[2, :3]) * X[3])) # Formula from the lecture notes
 
 # From A2_ex12
 def triangulate_point(P1, P2, x1, x2):
-    A = np.zeros((4,4))
+    A = np.vstack([
+        x1[0]*P1[2] - P1[0],
+        x1[1]*P1[2] - P1[1],
+        x2[0]*P2[2] - P2[0],
+        x2[1]*P2[2] - P2[1]
+    ])
+    return np.linalg.svd(A)[2][-1] # Return the last row of the Vt matrix in the SVD decomp. 
 
-    # Set up the system of equations from the two cameras and two corresponding points
-    A[0] = x1[0] * P1[2] - P1[0]
-    A[1] = x1[1] * P1[2] - P1[1]
-    A[2] = x2[0] * P2[2] - P2[0]
-    A[3] = x2[1] * P2[2] - P2[1]
-
-    # Solve the equation using SVD
-    _, _, Vt = np.linalg.svd(A)
-    X = Vt[-1]
-    return X
-
-def ransac_essential(x1n, x2n, x1_h, x2_h, K_inv, k=100, threshold=5.0):
+def ransac_essential(x1n, x2n, x1_h, x2_h, K_inv, k=200, threshold=5.0):
     best_inliers = None
     max_inliers = 0
 
@@ -76,7 +52,7 @@ def ransac_essential(x1n, x2n, x1_h, x2_h, K_inv, k=100, threshold=5.0):
                 l2 = l2 / np.sqrt(l2[0]**2 + l2[1]**2)
                 l1 = l1 / np.sqrt(l1[0]**2 + l1[1]**2)
 
-                # Compute point-to-line distances
+                # Compute point to line distances
                 d2 = np.abs(np.sum(l2 * x2_h, axis=0))
                 d1 = np.abs(np.sum(l1 * x1_h, axis=0))
 
@@ -240,8 +216,8 @@ if __name__ == "__main__":
     x2_inlier = x2[:, inliers]
 
     # Compute Euclidean reprojection error
-    err1 = np.sqrt(np.sum((x1_inlier - x1proj[:2, :])**2, axis=0))
-    err2 = np.sqrt(np.sum((x2_inlier - x2proj[:2, :])**2, axis=0))
+    err1 = np.linalg.norm(x1_inlier - x1proj[:2, :], axis=0)
+    err2 = np.linalg.norm(x2_inlier - x2proj[:2, :], axis=0)
 
     print("Average reprojection error image 1:", np.mean(err1))
     print("Average reprojection error image 2:", np.mean(err2))
